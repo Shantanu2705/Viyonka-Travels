@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Viyonka Travels CRM Data collections
+    match /enquiries/{enquiryId} {
+      allow read, write: if true;
+    }
+    match /quotations/{quotationId} {
+      allow read, write: if true;
+    }
+    match /bookings/{bookingId} {
+      allow read, write: if true;
+    }
+    match /invoices/{invoiceId} {
+      allow read, write: if true;
+    }
+    match /receipts/{receiptId} {
+      allow read, write: if true;
+    }
+    match /company_settings/{settingId} {
+      allow read, write: if true;
+    }
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
