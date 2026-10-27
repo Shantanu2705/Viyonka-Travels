@@ -70,6 +70,9 @@ interface FleetState {
 
   // Settings
   updateSettings: (s: Partial<CompanySettings>) => Promise<void>;
+
+  // Data Seeding
+  seedSampleData: () => Promise<void>;
 }
 
 export const useFleetStore = create<FleetState>((set, get) => ({
@@ -248,5 +251,13 @@ export const useFleetStore = create<FleetState>((set, get) => ({
   updateSettings: async (settings) => {
     await ViyonkaDatabase.updateSettings(settings);
     set((s) => ({ settings: { ...s.settings, ...settings } }));
+  },
+
+  // Seed Sample Data
+  seedSampleData: async () => {
+    set({ isLoading: true });
+    await ViyonkaDatabase.seedSampleDataToFirestore();
+    set({ isInitialized: false });
+    await get().fetchAll();
   },
 }));

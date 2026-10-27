@@ -18,8 +18,17 @@ import {
   getDoc,
   setDoc,
   deleteDoc,
-  query,
 } from 'firebase/firestore';
+import {
+  sampleVehicles,
+  sampleDrivers,
+  sampleCorporateClients,
+  sampleEnquiries,
+  sampleQuotations,
+  sampleBookings,
+  sampleInvoices,
+  sampleReceipts,
+} from './sample-data';
 
 // Default Viyonka Travels Company Settings
 export const initialViyonkaSettings: CompanySettings = {
@@ -86,9 +95,12 @@ export class ViyonkaDatabase {
         return remote;
       }
     } catch (e) {
-      console.warn('Firestore offline or rules locked; using local vehicle cache.', e);
+      console.warn('Firestore offline or rules locked; checking local cache.', e);
     }
-    return getLocalData<Vehicle[]>('vehicles', []);
+    const local = getLocalData<Vehicle[]>('vehicles', []);
+    if (local && local.length > 0) return local;
+    setLocalData('vehicles', sampleVehicles);
+    return sampleVehicles;
   }
 
   static async saveVehicle(vehicle: Vehicle): Promise<void> {
@@ -99,7 +111,7 @@ export class ViyonkaDatabase {
     try {
       await setDoc(doc(db, 'vehicles', vehicle.id), cleanForFirestore(vehicle));
     } catch (e) {
-      console.warn('Could not sync vehicle to Firestore (check security rules):', e);
+      console.warn('Could not sync vehicle to Firestore:', e);
     }
   }
 
@@ -124,9 +136,12 @@ export class ViyonkaDatabase {
         return remote;
       }
     } catch (e) {
-      console.warn('Firestore offline; using local driver cache.', e);
+      console.warn('Firestore offline; checking local cache.', e);
     }
-    return getLocalData<Driver[]>('drivers', []);
+    const local = getLocalData<Driver[]>('drivers', []);
+    if (local && local.length > 0) return local;
+    setLocalData('drivers', sampleDrivers);
+    return sampleDrivers;
   }
 
   static async saveDriver(driver: Driver): Promise<void> {
@@ -162,9 +177,12 @@ export class ViyonkaDatabase {
         return remote;
       }
     } catch (e) {
-      console.warn('Firestore offline; using local corporate clients cache.', e);
+      console.warn('Firestore offline; checking local cache.', e);
     }
-    return getLocalData<CorporateClient[]>('corporate-clients', []);
+    const local = getLocalData<CorporateClient[]>('corporate-clients', []);
+    if (local && local.length > 0) return local;
+    setLocalData('corporate-clients', sampleCorporateClients);
+    return sampleCorporateClients;
   }
 
   static async saveCorporateClient(client: CorporateClient): Promise<void> {
@@ -200,9 +218,12 @@ export class ViyonkaDatabase {
         return remote;
       }
     } catch (e) {
-      console.warn('Firestore offline; using local enquiries cache.', e);
+      console.warn('Firestore offline; checking local cache.', e);
     }
-    return getLocalData<Enquiry[]>('enquiries', []);
+    const local = getLocalData<Enquiry[]>('enquiries', []);
+    if (local && local.length > 0) return local;
+    setLocalData('enquiries', sampleEnquiries);
+    return sampleEnquiries;
   }
 
   static async saveEnquiry(enquiry: Enquiry): Promise<void> {
@@ -238,9 +259,12 @@ export class ViyonkaDatabase {
         return remote;
       }
     } catch (e) {
-      console.warn('Firestore offline; using local bookings cache.', e);
+      console.warn('Firestore offline; checking local cache.', e);
     }
-    return getLocalData<Booking[]>('bookings', []);
+    const local = getLocalData<Booking[]>('bookings', []);
+    if (local && local.length > 0) return local;
+    setLocalData('bookings', sampleBookings);
+    return sampleBookings;
   }
 
   static async saveBooking(booking: Booking): Promise<void> {
@@ -276,9 +300,12 @@ export class ViyonkaDatabase {
         return remote;
       }
     } catch (e) {
-      console.warn('Firestore offline; using local quotations cache.', e);
+      console.warn('Firestore offline; checking local cache.', e);
     }
-    return getLocalData<Quotation[]>('quotations', []);
+    const local = getLocalData<Quotation[]>('quotations', []);
+    if (local && local.length > 0) return local;
+    setLocalData('quotations', sampleQuotations);
+    return sampleQuotations;
   }
 
   static async saveQuotation(quotation: Quotation): Promise<void> {
@@ -314,9 +341,12 @@ export class ViyonkaDatabase {
         return remote;
       }
     } catch (e) {
-      console.warn('Firestore offline; using local invoices cache.', e);
+      console.warn('Firestore offline; checking local cache.', e);
     }
-    return getLocalData<Invoice[]>('invoices', []);
+    const local = getLocalData<Invoice[]>('invoices', []);
+    if (local && local.length > 0) return local;
+    setLocalData('invoices', sampleInvoices);
+    return sampleInvoices;
   }
 
   static async saveInvoice(invoice: Invoice): Promise<void> {
@@ -352,9 +382,12 @@ export class ViyonkaDatabase {
         return remote;
       }
     } catch (e) {
-      console.warn('Firestore offline; using local receipts cache.', e);
+      console.warn('Firestore offline; checking local cache.', e);
     }
-    return getLocalData<Receipt[]>('receipts', []);
+    const local = getLocalData<Receipt[]>('receipts', []);
+    if (local && local.length > 0) return local;
+    setLocalData('receipts', sampleReceipts);
+    return sampleReceipts;
   }
 
   static async saveReceipt(receipt: Receipt): Promise<void> {
@@ -445,6 +478,51 @@ export class ViyonkaDatabase {
       await setDoc(doc(db, 'company_settings', 'main'), cleanForFirestore(updated));
     } catch (e) {
       console.warn('Could not sync settings to Firestore:', e);
+    }
+  }
+
+  // --- SEED ALL SAMPLE DATA DIRECTLY TO FIRESTORE ---
+  static async seedSampleDataToFirestore(): Promise<{ success: boolean; message: string }> {
+    try {
+      // Seed Vehicles
+      for (const v of sampleVehicles) {
+        await setDoc(doc(db, 'vehicles', v.id), cleanForFirestore(v));
+      }
+      // Seed Drivers
+      for (const d of sampleDrivers) {
+        await setDoc(doc(db, 'drivers', d.id), cleanForFirestore(d));
+      }
+      // Seed Corporate Clients
+      for (const c of sampleCorporateClients) {
+        await setDoc(doc(db, 'corporate_clients', c.id), cleanForFirestore(c));
+      }
+      // Seed Enquiries
+      for (const e of sampleEnquiries) {
+        await setDoc(doc(db, 'enquiries', e.id), cleanForFirestore(e));
+      }
+      // Seed Quotations
+      for (const q of sampleQuotations) {
+        await setDoc(doc(db, 'quotations', q.id), cleanForFirestore(q));
+      }
+      // Seed Bookings
+      for (const b of sampleBookings) {
+        await setDoc(doc(db, 'bookings', b.id), cleanForFirestore(b));
+      }
+      // Seed Invoices
+      for (const i of sampleInvoices) {
+        await setDoc(doc(db, 'invoices', i.id), cleanForFirestore(i));
+      }
+      // Seed Receipts
+      for (const r of sampleReceipts) {
+        await setDoc(doc(db, 'receipts', r.id), cleanForFirestore(r));
+      }
+      // Seed Settings
+      await setDoc(doc(db, 'company_settings', 'main'), cleanForFirestore(initialViyonkaSettings));
+
+      return { success: true, message: 'All Viyonka Travels sample data successfully written to Cloud Firestore!' };
+    } catch (err: any) {
+      console.error('Error seeding to Firestore:', err);
+      return { success: false, message: err?.message || 'Failed to seed sample data to Firestore' };
     }
   }
 }
